@@ -49,6 +49,10 @@ app.get("/api/me", requireUser, (req, res) => {
 });
 
 app.get("/api/students/:id", requireUser, (req, res) => {
+  //Added this to check if the user is a TA or the own user to access the grades.
+  if (req.claims.role !== "ta" && Number(req.claims.sub) !== Number(req.params.id)) {
+    return res.status(403).json({ error: "Not authorized." });
+  }
   const db = load();
   const student = db.users.find((row) => row.id === Number(req.params.id) && row.role === "student");
   if (!student) return res.status(404).json({ error: "No student with that id." });
